@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"
+        integrity="sha512-/hVAZO5POxCKdZMSLefw30xEVwjm94PAV9ynjskGbIpBvHO9EBplEcdUlBdCKutpZsF+La8Ag4gNrG0gAOn3Ig=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
+     <script src="https://simonbengtsson.github.io/jsPDF-AutoTable/dist/jspdf.plugin.autotable.min.js"></script>
+      <script src="https://simonbengtsson.github.io/jsPDF-AutoTable/examples/libs/faker.min.js"></script>
+  </head>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+  </style>
+  <body>
+    <button onclick="generate()">Generate pdf</button>
+  
+    <script>
+    
+function headRows() {
+  return [
+    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+  ]
+}
+
+function footRows() {
+  return [
+    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+  ]
+}
+
+function columns() {
+  return [
+    { header: 'ID', dataKey: 'id' },
+    { header: 'Name', dataKey: 'name' },
+    { header: 'Email', dataKey: 'email' },
+    { header: 'City', dataKey: 'city' },
+    { header: 'Exp', dataKey: 'expenses' },
+  ]
+}
+
+function data(rowCount) {
+  rowCount = rowCount || 10
+  var body = []
+  for (var j = 1; j <= rowCount; j++) {
+    body.push({
+      id: j,
+      name: faker.name.findName(),
+      email: faker.internet.email(),
+      city: faker.address.city(),
+      expenses: faker.finance.amount(),
+    })
+  }
+  return body
+}
+
+function bodyRows(rowCount) {
+  rowCount = rowCount || 10
+  var body = []
+  for (var j = 1; j <= rowCount; j++) {
+    body.push({
+      id: j,
+      name: faker.name.findName(),
+      email: faker.internet.email(),
+      city: faker.address.city(),
+      expenses: faker.finance.amount(),
+    })
+  }
+  return body
+}
+
+      function generate() {
+        var doc = new jspdf.jsPDF({
+            unit: 'pt', // points, pixels won't work properly
+            orientation: 'portrait',
+            format: 'a4'
+        });
+        
+      
+
+
+      var totalPagesExp = '{total_pages_count_string}'
+
+      doc.autoTable({
+        head: headRows(),
+        body: bodyRows(40),
+        willDrawPage: function (data) {
+          // Header
+          doc.setFontSize(20)
+          doc.setTextColor(40)
+          if (base64Img) {
+            doc.addImage(base64Img, 'JPEG', data.settings.margin.left, 15, 10, 10)
+          }
+          doc.text('Report', data.settings.margin.left + 15, 22)
+        },
+        didDrawPage: function (data) {
+          // Footer
+          var str = 'Page ' + doc.internal.getNumberOfPages()
+          // Total page number plugin only available in jspdf v1.0+
+          if (typeof doc.putTotalPages === 'function') {
+            str = str + ' of ' + totalPagesExp
+          }
+          doc.setFontSize(10)
+
+          // jsPDF 1.4+ uses getHeight, <1.4 uses .height
+          var pageSize = doc.internal.pageSize
+          var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+          doc.text(str, data.settings.margin.left, pageHeight - 10)
+        },
+        margin: { top: 30 },
+      })
+
+      // Total page number plugin only available in jspdf v1.0+
+      if (typeof doc.putTotalPages === 'function') {
+        doc.putTotalPages(totalPagesExp)
+      }
+
+        doc.save('table.pdf')
+      }
+
+    </script>
+  </body>
+</html>
